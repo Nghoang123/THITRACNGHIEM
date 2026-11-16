@@ -984,8 +984,10 @@ def court_line_rects():
 
 
 def build_lines():
-    z = MAT_T + 0.003
     for name, (x0, y0, x1, y1) in court_line_rects().items():
+        # lines across the court sit 0.5 mm above the lengthwise ones, so the
+        # squares where two lines cross are never coplanar (no z-fighting)
+        z = MAT_T + 0.003 + (0.0005 if (x1 - x0) > (y1 - y0) else 0.0)
         mb = MeshBuilder(["Court_Line"])
         mb.quad((x0, y0, z), (x1, y0, z), (x1, y1, z), (x0, y1, z), 0)
         mb.to_object(name, "COURT_LINES")
@@ -997,7 +999,7 @@ def build_lines():
 def make_net_texture():
     """Tileable RGBA texture of one 19 mm net cell (works in Unity as a
     cut-out / alpha-clipped texture)."""
-    size, strand = 64, 5
+    size, strand = 64, 6
     img = bpy.data.images.new("Net_Mesh_Cell", size, size, alpha=True)
     px = [0.0] * (size * size * 4)
     col = srgb(48, 34, 26)
